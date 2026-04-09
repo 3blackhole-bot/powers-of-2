@@ -8,16 +8,43 @@ type LeaderboardEntry = {
   createdAt: string;
 };
 
+const funFacts = [
+  "2^1 = 2, the first leap from one thing to a pair.",
+  "2^2 = 4, the number of quadrants, cardinal directions, and a very stable square.",
+  "2^3 = 8, the number of corners on a cube.",
+  "2^4 = 16, a classic memory and color threshold in early computing systems.",
+  "2^5 = 32, enough branches to start feeling tree-like.",
+  "2^6 = 64, a beloved number in games, processors, and chessboard geometry.",
+  "2^7 = 128, a classic byte-scale milestone.",
+  "2^8 = 256, exactly how many values fit in one unsigned byte.",
+  "2^9 = 512, a storage size you still see everywhere.",
+  "2^10 = 1024, the famous almost-a-thousand that anchors kilobytes.",
+  "2^11 = 2048, enough to feel genuinely big in your head.",
+  "2^12 = 4096, a familiar texture and memory dimension.",
+  "2^13 = 8192, now the numbers start running away from intuition.",
+  "2^14 = 16384, exponential growth getting loud.",
+  "2^15 = 32768, a classic signed integer limit landmark.",
+  "2^16 = 65536, one of the great powers of 2 in digital systems.",
+];
+
 function formatPower(exponent: number) {
   return `2^${exponent}`;
+}
+
+function getPowerValue(exponent: number) {
+  return BigInt(2) ** BigInt(exponent);
+}
+
+function getExpectedValue(exponent: number) {
+  return getPowerValue(exponent + 1).toString();
 }
 
 export default function PowersGame() {
   const [name, setName] = useState("");
   const [currentExponent, setCurrentExponent] = useState(0);
-  const [guess, setGuess] = useState("1");
+  const [guess, setGuess] = useState("2");
   const [score, setScore] = useState(0);
-  const [message, setMessage] = useState("Start at 2^0. Type the next power of 2 each turn.");
+  const [message, setMessage] = useState("Start at 2^0 = 1, then type 2 as the next power.");
   const [entries, setEntries] = useState<LeaderboardEntry[]>([]);
   const [highScore, setHighScore] = useState(0);
   const [submitting, setSubmitting] = useState(false);
@@ -35,7 +62,11 @@ export default function PowersGame() {
     });
   }, []);
 
-  const expectedValue = useMemo(() => String(2 ** (currentExponent + 1)), [currentExponent]);
+  const expectedValue = useMemo(() => getExpectedValue(currentExponent), [currentExponent]);
+  const currentFact = useMemo(
+    () => funFacts[Math.min(currentExponent, funFacts.length - 1)] ?? "Doubling never stops being dramatic.",
+    [currentExponent],
+  );
 
   async function saveScore(finalScore: number) {
     if (!name.trim()) {
@@ -74,8 +105,8 @@ export default function PowersGame() {
       const nextExponent = currentExponent + 1;
       setScore(nextScore);
       setCurrentExponent(nextExponent);
-      setGuess(String(2 ** (nextExponent + 1)));
-      setMessage(`Correct. ${formatPower(nextExponent)} = ${2 ** nextExponent}. Keep going.`);
+      setGuess(getExpectedValue(nextExponent));
+      setMessage(`Correct. ${formatPower(nextExponent)} = ${getPowerValue(nextExponent).toString()}. ${funFacts[Math.min(nextExponent, funFacts.length - 1)] ?? "Still doubling, still gorgeous."}`);
       return;
     }
 
@@ -84,14 +115,14 @@ export default function PowersGame() {
     await saveScore(finalScore);
     setCurrentExponent(0);
     setScore(0);
-    setGuess("1");
+    setGuess("2");
   }
 
   function resetGame() {
     setCurrentExponent(0);
     setScore(0);
-    setGuess("1");
-    setMessage("Reset. Start again from 2^0 and build upward.");
+    setGuess("2");
+    setMessage("Reset. Start from 2^0 = 1 and race upward again.");
   }
 
   return (
@@ -119,8 +150,13 @@ export default function PowersGame() {
           </label>
           <div className="rounded-2xl border border-white/10 bg-slate-950/50 px-4 py-3">
             <p className="text-xs uppercase tracking-[0.25em] text-slate-400">Current anchor</p>
-            <p className="mt-1 text-2xl font-semibold text-white">{formatPower(currentExponent)} = {2 ** currentExponent}</p>
+            <p className="mt-1 text-2xl font-semibold text-white">{formatPower(currentExponent)} = {getPowerValue(currentExponent).toString()}</p>
           </div>
+        </div>
+
+        <div className="mb-4 rounded-2xl border border-fuchsia-300/20 bg-fuchsia-400/10 p-4">
+          <p className="text-xs uppercase tracking-[0.25em] text-fuchsia-200">Fun fact unlocked</p>
+          <p className="mt-2 leading-7 text-slate-200">{currentFact}</p>
         </div>
 
         <form onSubmit={handleSubmit} className="grid gap-4 sm:grid-cols-[1fr_auto]">
@@ -149,6 +185,9 @@ export default function PowersGame() {
           </button>
           <div className="rounded-full bg-fuchsia-400/10 px-4 py-2 text-sm text-fuchsia-200">
             Highest score ever: <span className="font-bold text-white">{highScore}</span>
+          </div>
+          <div className="rounded-full bg-emerald-400/10 px-4 py-2 text-sm text-emerald-200">
+            Next target: <span className="font-bold text-white">{formatPower(currentExponent + 1)}</span>
           </div>
           {submitting ? <div className="rounded-full bg-white/10 px-4 py-2 text-sm text-slate-300">Saving score...</div> : null}
         </div>
