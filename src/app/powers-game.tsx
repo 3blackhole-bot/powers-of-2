@@ -88,12 +88,6 @@ export default function PowersGame() {
     return () => window.clearTimeout(timer);
   }, [mode, timeLeft]);
 
-  useEffect(() => {
-    if (mode === "timed" && timeLeft === 0) {
-      void finishRun(`Time's up. Final score: ${score}.`);
-    }
-  }, [finishRun, mode, score, timeLeft]);
-
   const expectedValue = useMemo(() => {
     if (mode === "reverse") {
       return currentExponent <= 0 ? "1" : getPowerValue(currentExponent - 1).toString();
@@ -149,6 +143,12 @@ export default function PowersGame() {
     await saveScore(finalScore);
     resetGameState(mode);
   }, [mode, saveScore, score]);
+
+  useEffect(() => {
+    if (mode === "timed" && timeLeft === 0) {
+      void finishRun(`Time's up. Final score: ${score}.`);
+    }
+  }, [finishRun, mode, score, timeLeft]);
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
