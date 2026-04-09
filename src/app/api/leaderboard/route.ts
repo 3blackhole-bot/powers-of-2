@@ -1,8 +1,6 @@
-import { promises as fs } from "fs";
-import path from "path";
+import { del, head, put } from "@vercel/blob";
 
-const dataDir = path.join(process.cwd(), "data");
-const leaderboardPath = path.join(dataDir, "leaderboard.json");
+const leaderboardBlobPath = "leaderboard.json";
 
 type LeaderboardEntry = {
   name: string;
@@ -10,21 +8,16 @@ type LeaderboardEntry = {
   createdAt: string;
 };
 
-async function ensureLeaderboardFile() {
-  await fs.mkdir(dataDir, { recursive: true });
-  try {
-    await fs.access(leaderboardPath);
-  } catch {
-    await fs.writeFile(leaderboardPath, "[]\n", "utf8");
-  }
-}
-
 async function readLeaderboard(): Promise<LeaderboardEntry[]> {
-  await ensureLeaderboardFile();
-  const raw = await fs.readFile(leaderboardPath, "utf8");
-
   try {
-    const parsed = JSON.parse(raw) as LeaderboardEntry[];
+    const blob = await head(leaderboardBlobPath);
+    const response = await fetch(blob.url, { cache: "no-store" });
+
+    if (!response.ok) {
+      return [];
+    }
+
+    const parsed = (await response.json()) as LeaderboardEntry[];
     return parsed
       .filter((entry) => entry && typeof entry.name === "string" && typeof entry.score === "number")
       .sort((a, b) => b.score - a.score || a.createdAt.localeCompare(b.createdAt))
@@ -35,8 +28,17 @@ async function readLeaderboard(): Promise<LeaderboardEntry[]> {
 }
 
 async function writeLeaderboard(entries: LeaderboardEntry[]) {
-  await ensureLeaderboardFile();
-  await fs.writeFile(leaderboardPath, `${JSON.stringify(entries, null, 2)}\n`, "utf8");
+  const existing = await head(leaderboardBlobPath).catch(() => null);
+
+  const uploaded = await put(leaderboardBlobPath, JSON.stringify(entries, null, 2), {
+    access: "public",
+    contentType: "application/json",
+    addRandomSuffix: false,
+  });
+
+  if (existing?.url && existing.url !== uploaded.url) {
+    await del(existing.url).catch(() => undefined);
+  }
 }
 
 export async function GET() {
