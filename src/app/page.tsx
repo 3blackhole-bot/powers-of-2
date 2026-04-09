@@ -29,11 +29,11 @@ const museumFacts = [
 
 export default function Home() {
   return (
-    <main className="mx-auto flex w-full max-w-7xl flex-col gap-16 px-6 py-10 sm:px-10 lg:px-12">
-      <section className="grid gap-8 rounded-[2rem] border border-white/10 bg-[radial-gradient(circle_at_top_left,_rgba(103,232,249,0.16),_transparent_25%),radial-gradient(circle_at_top_right,_rgba(217,70,239,0.16),_transparent_28%),linear-gradient(180deg,rgba(15,23,42,0.96),rgba(2,6,23,0.98))] p-8 shadow-2xl shadow-cyan-950/20 lg:grid-cols-[1.15fr_0.85fr] lg:p-12">
+    <main className="mx-auto flex w-full max-w-7xl flex-col gap-10 px-4 py-6 sm:gap-16 sm:px-6 sm:py-10 lg:px-12">
+      <section className="grid gap-6 rounded-[2rem] border border-white/10 bg-[radial-gradient(circle_at_top_left,_rgba(103,232,249,0.16),_transparent_25%),radial-gradient(circle_at_top_right,_rgba(217,70,239,0.16),_transparent_28%),linear-gradient(180deg,rgba(15,23,42,0.96),rgba(2,6,23,0.98))] p-5 shadow-2xl shadow-cyan-950/20 sm:gap-8 sm:p-8 lg:grid-cols-[1.15fr_0.85fr] lg:p-12">
         <div>
           <p className="text-sm uppercase tracking-[0.4em] text-cyan-300">Powers of 2</p>
-          <h1 className="mt-4 max-w-3xl text-4xl font-semibold tracking-tight text-white sm:text-5xl lg:text-6xl">
+          <h1 className="mt-4 max-w-3xl text-3xl font-semibold tracking-tight text-white sm:text-5xl lg:text-6xl">
             A love letter to the most elegant doubling pattern in mathematics.
           </h1>
           <p className="mt-6 max-w-2xl text-lg leading-8 text-slate-200">
@@ -52,7 +52,7 @@ export default function Home() {
         <div className="rounded-[1.5rem] border border-white/10 bg-slate-950/60 p-6">
           <p className="text-sm uppercase tracking-[0.3em] text-fuchsia-300">Powers of 2 in one picture</p>
           <div className="mt-4 overflow-hidden rounded-[1.5rem] border border-white/10 bg-[radial-gradient(circle_at_center,_rgba(34,211,238,0.12),_transparent_45%),linear-gradient(180deg,rgba(15,23,42,0.95),rgba(2,6,23,0.95))] p-5">
-            <div className="relative min-h-[340px] overflow-hidden rounded-[1.25rem] border border-white/10 bg-slate-950/70">
+            <div className="relative min-h-[420px] overflow-hidden rounded-[1.25rem] border border-white/10 bg-slate-950/70 sm:min-h-[340px]">
               <div className="absolute inset-x-0 bottom-0 h-24 bg-[linear-gradient(180deg,transparent,rgba(15,23,42,0.95))]" />
               <div className="absolute left-1/2 top-8 h-48 w-px -translate-x-1/2 bg-cyan-200/40" />
               <div className="absolute left-1/2 top-16 h-16 w-16 -translate-x-1/2 rounded-full border border-cyan-300/30 bg-cyan-300/10" />
@@ -82,7 +82,7 @@ export default function Home() {
                 </div>
               ))}
 
-              <div className="absolute bottom-6 left-6 right-6 grid grid-cols-4 gap-2">
+              <div className="absolute bottom-4 left-4 right-4 grid grid-cols-2 gap-2 sm:bottom-6 sm:left-6 sm:right-6 sm:grid-cols-4">
                 {Array.from({ length: 8 }, (_, index) => (
                   <div
                     key={index}
@@ -101,8 +101,8 @@ export default function Home() {
         </div>
       </section>
 
-      <section className="grid gap-8 lg:grid-cols-[0.95fr_1.05fr]">
-        <article className="rounded-[2rem] border border-white/10 bg-white/5 p-8 backdrop-blur">
+      <section className="grid gap-6 sm:gap-8 lg:grid-cols-[0.95fr_1.05fr]">
+        <article className="rounded-[2rem] border border-white/10 bg-white/5 p-5 backdrop-blur sm:p-8">
           <p className="text-sm uppercase tracking-[0.3em] text-cyan-300">Why mathematicians adore them</p>
           <h2 className="mt-3 text-3xl font-semibold text-white">Simple rule, wild consequences</h2>
           <div className="mt-6 space-y-5 text-slate-200">
@@ -122,7 +122,7 @@ export default function Home() {
           </div>
         </article>
 
-        <article className="rounded-[2rem] border border-white/10 bg-slate-950/60 p-8">
+        <article className="rounded-[2rem] border border-white/10 bg-slate-950/60 p-5 sm:p-8">
           <p className="text-sm uppercase tracking-[0.3em] text-fuchsia-300">Brief history and practical use</p>
           <h2 className="mt-3 text-3xl font-semibold text-white">From old puzzles to modern machines</h2>
           <div className="mt-6 space-y-5">
@@ -143,8 +143,8 @@ export default function Home() {
         </article>
       </section>
 
-      <section className="grid gap-8 lg:grid-cols-[1.1fr_0.9fr]">
-        <section className="rounded-[2rem] border border-white/10 bg-slate-950/65 p-8">
+      <section className="grid gap-6 sm:gap-8 lg:grid-cols-[1.1fr_0.9fr]">
+        <section className="rounded-[2rem] border border-white/10 bg-slate-950/65 p-5 sm:p-8">
           <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
             <div>
               <p className="text-sm uppercase tracking-[0.3em] text-amber-300">The sequence</p>
@@ -164,7 +164,7 @@ export default function Home() {
           </div>
         </section>
 
-        <aside className="rounded-[2rem] border border-white/10 bg-white/5 p-8 backdrop-blur">
+        <aside className="rounded-[2rem] border border-white/10 bg-white/5 p-5 backdrop-blur sm:p-8">
           <p className="text-sm uppercase tracking-[0.3em] text-fuchsia-300">Mini math museum</p>
           <h2 className="mt-2 text-3xl font-semibold text-white">Four delightful facts</h2>
           <div className="mt-6 grid gap-4">

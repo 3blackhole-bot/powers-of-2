@@ -27,6 +27,8 @@ const funFacts = [
   "2^16 = 65536, one of the great powers of 2 in digital systems.",
 ];
 
+const MAX_LIVES = 3;
+
 function formatPower(exponent: number) {
   return `2^${exponent}`;
 }
@@ -42,9 +44,11 @@ function getExpectedValue(exponent: number) {
 export default function PowersGame() {
   const [name, setName] = useState("");
   const [currentExponent, setCurrentExponent] = useState(0);
-  const [guess, setGuess] = useState("2");
+  const [guess, setGuess] = useState("");
   const [score, setScore] = useState(0);
-  const [message, setMessage] = useState("Start at 2^0 = 1, then type 2 as the next power.");
+  const [livesLeft, setLivesLeft] = useState(MAX_LIVES);
+  const [correctHistory, setCorrectHistory] = useState<string[]>(["2^0 = 1"]);
+  const [message, setMessage] = useState("Start at 2^0 = 1, then type the next power yourself.");
   const [entries, setEntries] = useState<LeaderboardEntry[]>([]);
   const [highScore, setHighScore] = useState(0);
   const [submitting, setSubmitting] = useState(false);
@@ -103,38 +107,59 @@ export default function PowersGame() {
     if (guess.trim() === expectedValue) {
       const nextScore = score + 1;
       const nextExponent = currentExponent + 1;
+      const solvedEntry = `${formatPower(nextExponent)} = ${getPowerValue(nextExponent).toString()}`;
+
       setScore(nextScore);
       setCurrentExponent(nextExponent);
-      setGuess(getExpectedValue(nextExponent));
-      setMessage(`Correct. ${formatPower(nextExponent)} = ${getPowerValue(nextExponent).toString()}. ${funFacts[Math.min(nextExponent, funFacts.length - 1)] ?? "Still doubling, still gorgeous."}`);
+      setCorrectHistory((history) => [...history, solvedEntry]);
+      setGuess("");
+      setMessage(`Correct. ${solvedEntry}. ${funFacts[Math.min(nextExponent, funFacts.length - 1)] ?? "Still doubling, still gorgeous."}`);
+      return;
+    }
+
+    const nextLives = livesLeft - 1;
+
+    if (nextLives > 0) {
+      setLivesLeft(nextLives);
+      setGuess("");
+      setMessage(`Not quite. You lose a life, but stay in the game. ${nextLives} ${nextLives === 1 ? "life" : "lives"} left.`);
       return;
     }
 
     const finalScore = score;
-    setMessage(`Almost. The next value after ${formatPower(currentExponent)} is ${expectedValue}. Your score: ${finalScore}.`);
+    setMessage(`Crash out. The next value after ${formatPower(currentExponent)} was ${expectedValue}. Final score: ${finalScore}.`);
     await saveScore(finalScore);
+    resetGameState();
+  }
+
+  function resetGameState() {
     setCurrentExponent(0);
     setScore(0);
-    setGuess("2");
+    setLivesLeft(MAX_LIVES);
+    setGuess("");
+    setCorrectHistory(["2^0 = 1"]);
   }
 
   function resetGame() {
-    setCurrentExponent(0);
-    setScore(0);
-    setGuess("2");
-    setMessage("Reset. Start from 2^0 = 1 and race upward again.");
+    resetGameState();
+    setMessage("Reset. Start from 2^0 = 1 and build upward again.");
   }
 
   return (
-    <section className="grid gap-8 lg:grid-cols-[1.2fr_0.8fr]">
-      <div className="rounded-3xl border border-white/10 bg-white/5 p-6 shadow-2xl shadow-cyan-950/20 backdrop-blur">
-        <div className="mb-5 flex items-center justify-between gap-4">
+    <section className="grid gap-6 lg:grid-cols-[1.2fr_0.8fr]">
+      <div className="rounded-3xl border border-white/10 bg-white/5 p-4 shadow-2xl shadow-cyan-950/20 backdrop-blur sm:p-6">
+        <div className="mb-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <p className="text-sm uppercase tracking-[0.3em] text-cyan-300">Game</p>
             <h3 className="text-2xl font-semibold text-white">Chase the next power</h3>
           </div>
-          <div className="rounded-full bg-cyan-400/10 px-4 py-2 text-sm text-cyan-200">
-            Score <span className="font-bold text-white">{score}</span>
+          <div className="flex flex-wrap gap-2">
+            <div className="rounded-full bg-cyan-400/10 px-4 py-2 text-sm text-cyan-200">
+              Score <span className="font-bold text-white">{score}</span>
+            </div>
+            <div className="rounded-full bg-rose-400/10 px-4 py-2 text-sm text-rose-200">
+              Lives <span className="font-bold text-white">{Array.from({ length: livesLeft }, () => "♥").join(" ")}</span>
+            </div>
           </div>
         </div>
 
@@ -150,7 +175,7 @@ export default function PowersGame() {
           </label>
           <div className="rounded-2xl border border-white/10 bg-slate-950/50 px-4 py-3">
             <p className="text-xs uppercase tracking-[0.25em] text-slate-400">Current anchor</p>
-            <p className="mt-1 text-2xl font-semibold text-white">{formatPower(currentExponent)} = {getPowerValue(currentExponent).toString()}</p>
+            <p className="mt-1 break-all text-xl font-semibold text-white sm:text-2xl">{formatPower(currentExponent)} = {getPowerValue(currentExponent).toString()}</p>
           </div>
         </div>
 
@@ -193,9 +218,26 @@ export default function PowersGame() {
         </div>
 
         <p className="mt-5 text-sm leading-7 text-slate-300">{message}</p>
+
+        <div className="mt-6 rounded-2xl border border-white/10 bg-slate-950/45 p-4">
+          <div className="flex items-center justify-between gap-3">
+            <p className="text-sm uppercase tracking-[0.25em] text-amber-300">Correct submissions so far</p>
+            <p className="text-xs text-slate-400">{correctHistory.length} unlocked</p>
+          </div>
+          <div className="mt-4 flex max-h-56 flex-wrap gap-2 overflow-y-auto">
+            {correctHistory.map((entry) => (
+              <div
+                key={entry}
+                className="rounded-full border border-amber-300/20 bg-amber-300/10 px-3 py-2 text-xs text-amber-100 sm:text-sm"
+              >
+                {entry}
+              </div>
+            ))}
+          </div>
+        </div>
       </div>
 
-      <aside className="rounded-3xl border border-white/10 bg-slate-950/60 p-6">
+      <aside className="rounded-3xl border border-white/10 bg-slate-950/60 p-4 sm:p-6">
         <p className="text-sm uppercase tracking-[0.3em] text-fuchsia-300">Leaderboard</p>
         <h3 className="mt-2 text-2xl font-semibold text-white">Hall of exponential fame</h3>
         <ol className="mt-6 space-y-3">
@@ -207,13 +249,13 @@ export default function PowersGame() {
             entries.map((entry, index) => (
               <li
                 key={`${entry.name}-${entry.createdAt}-${index}`}
-                className="flex items-center justify-between rounded-2xl border border-white/10 bg-white/5 px-4 py-3"
+                className="flex items-center justify-between gap-3 rounded-2xl border border-white/10 bg-white/5 px-4 py-3"
               >
-                <div>
-                  <p className="font-medium text-white">#{index + 1} {entry.name}</p>
+                <div className="min-w-0">
+                  <p className="truncate font-medium text-white">#{index + 1} {entry.name}</p>
                   <p className="text-xs text-slate-400">Saved {new Date(entry.createdAt).toLocaleDateString()}</p>
                 </div>
-                <div className="text-lg font-semibold text-cyan-200">{entry.score}</div>
+                <div className="shrink-0 text-lg font-semibold text-cyan-200">{entry.score}</div>
               </li>
             ))
           )}
