@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 
 type LeaderboardEntry = {
   name: string;
@@ -41,6 +41,13 @@ function getExpectedValue(exponent: number) {
   return getPowerValue(exponent + 1).toString();
 }
 
+function getCelebration(score: number) {
+  if (score >= 12) return "⚡ Exponential beast.";
+  if (score >= 8) return "✨ You are properly dangerous now.";
+  if (score >= 4) return "🌙 Nice streak.";
+  return "";
+}
+
 export default function PowersGame() {
   const [name, setName] = useState("");
   const [currentExponent, setCurrentExponent] = useState(0);
@@ -52,6 +59,10 @@ export default function PowersGame() {
   const [entries, setEntries] = useState<LeaderboardEntry[]>([]);
   const [highScore, setHighScore] = useState(0);
   const [submitting, setSubmitting] = useState(false);
+  const [showCelebration, setShowCelebration] = useState(false);
+  const [shareCopied, setShareCopied] = useState(false);
+  const [mode, setMode] = useState<"classic" | "timed" | "reverse">("classic");
+  const [timeLeft, setTimeLeft] = useState(45);
 
   async function loadLeaderboard() {
     const response = await fetch("/api/leaderboard", { cache: "no-store" });
@@ -66,13 +77,43 @@ export default function PowersGame() {
     });
   }, []);
 
-  const expectedValue = useMemo(() => getExpectedValue(currentExponent), [currentExponent]);
+  useEffect(() => {
+    if (mode !== "timed") return;
+    if (timeLeft <= 0) return;
+
+    const timer = window.setTimeout(() => {
+      setTimeLeft((value) => value - 1);
+    }, 1000);
+
+    return () => window.clearTimeout(timer);
+  }, [mode, timeLeft]);
+
+  useEffect(() => {
+    if (mode === "timed" && timeLeft === 0) {
+      void finishRun(`Time's up. Final score: ${score}.`);
+    }
+  }, [finishRun, mode, score, timeLeft]);
+
+  const expectedValue = useMemo(() => {
+    if (mode === "reverse") {
+      return currentExponent <= 0 ? "1" : getPowerValue(currentExponent - 1).toString();
+    }
+    return getExpectedValue(currentExponent);
+  }, [currentExponent, mode]);
+
+  const nextPrompt = useMemo(() => {
+    if (mode === "reverse") {
+      return currentExponent <= 0 ? "Return to 2^0" : `Previous target: ${formatPower(currentExponent - 1)}`;
+    }
+    return `Next target: ${formatPower(currentExponent + 1)}`;
+  }, [currentExponent, mode]);
+
   const currentFact = useMemo(
     () => funFacts[Math.min(currentExponent, funFacts.length - 1)] ?? "Doubling never stops being dramatic.",
     [currentExponent],
   );
 
-  async function saveScore(finalScore: number) {
+  const saveScore = useCallback(async (finalScore: number) => {
     if (!name.trim()) {
       setMessage(`Nice run. You reached ${finalScore}, but add your name to save it to the leaderboard.`);
       return;
@@ -94,26 +135,37 @@ export default function PowersGame() {
 
       setEntries(data.entries);
       setHighScore(data.highScore);
+      setMessage((current) => `${current} Score saved for ${name}.`);
     } catch {
       setMessage("Couldn’t save your score right now.");
     } finally {
       setSubmitting(false);
     }
-  }
+  }, [name]);
+
+  const finishRun = useCallback(async (finalMessage: string) => {
+    const finalScore = score;
+    setMessage(finalMessage);
+    await saveScore(finalScore);
+    resetGameState(mode);
+  }, [mode, saveScore, score]);
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
 
     if (guess.trim() === expectedValue) {
       const nextScore = score + 1;
-      const nextExponent = currentExponent + 1;
-      const solvedEntry = `${formatPower(nextExponent)} = ${getPowerValue(nextExponent).toString()}`;
+      const nextExponent = mode === "reverse" ? Math.max(currentExponent - 1, 0) : currentExponent + 1;
+      const solvedExponent = mode === "reverse" ? Math.max(currentExponent - 1, 0) : currentExponent + 1;
+      const solvedEntry = `${formatPower(solvedExponent)} = ${getPowerValue(solvedExponent).toString()}`;
 
       setScore(nextScore);
       setCurrentExponent(nextExponent);
       setCorrectHistory((history) => [...history, solvedEntry]);
       setGuess("");
-      setMessage(`Correct. ${solvedEntry}. ${funFacts[Math.min(nextExponent, funFacts.length - 1)] ?? "Still doubling, still gorgeous."}`);
+      setShowCelebration(true);
+      window.setTimeout(() => setShowCelebration(false), 900);
+      setMessage(`Correct. ${solvedEntry}. ${funFacts[Math.min(solvedExponent, funFacts.length - 1)] ?? "Still doubling, still gorgeous."} ${getCelebration(nextScore)}`.trim());
       return;
     }
 
@@ -126,28 +178,55 @@ export default function PowersGame() {
       return;
     }
 
-    const finalScore = score;
-    setMessage(`Crash out. The next value after ${formatPower(currentExponent)} was ${expectedValue}. Final score: ${finalScore}.`);
-    await saveScore(finalScore);
-    resetGameState();
+    await finishRun(`Crash out. ${mode === "reverse" ? "The previous value" : "The next value"} was ${expectedValue}. Final score: ${score}.`);
   }
 
-  function resetGameState() {
-    setCurrentExponent(0);
+  function resetGameState(nextMode = mode) {
+    setCurrentExponent(nextMode === "reverse" ? 12 : 0);
     setScore(0);
     setLivesLeft(MAX_LIVES);
     setGuess("");
-    setCorrectHistory(["2^0 = 1"]);
+    setCorrectHistory(nextMode === "reverse" ? ["2^12 = 4096"] : ["2^0 = 1"]);
+    setTimeLeft(45);
   }
 
-  function resetGame() {
-    resetGameState();
-    setMessage("Reset. Start from 2^0 = 1 and build upward again.");
+  function resetGame(nextMode = mode) {
+    resetGameState(nextMode);
+    setMessage(nextMode === "reverse" ? "Reverse mode. Walk backward through the powers." : "Reset. Start from 2^0 = 1 and build upward again.");
+  }
+
+  function switchMode(nextMode: "classic" | "timed" | "reverse") {
+    setMode(nextMode);
+    resetGame(nextMode);
+  }
+
+  async function copyShareCard() {
+    const text = `${name || "Anonymous"} scored ${score} on Powers of 2. Highest score ever: ${highScore}. Try it at https://powers-of-2.vercel.app`;
+    await navigator.clipboard.writeText(text);
+    setShareCopied(true);
+    window.setTimeout(() => setShareCopied(false), 1400);
   }
 
   return (
     <section className="grid gap-6 lg:grid-cols-[1.2fr_0.8fr]">
       <div className="rounded-3xl border border-white/10 bg-white/5 p-4 shadow-2xl shadow-cyan-950/20 backdrop-blur sm:p-6">
+        <div className="mb-4 flex flex-wrap gap-2">
+          {([
+            ["classic", "Classic"],
+            ["timed", "Timed"],
+            ["reverse", "Reverse"],
+          ] as const).map(([value, label]) => (
+            <button
+              key={value}
+              type="button"
+              onClick={() => switchMode(value)}
+              className={`rounded-full px-4 py-2 text-sm transition ${mode === value ? "bg-cyan-300 text-slate-950" : "border border-white/10 text-slate-200 hover:border-cyan-300"}`}
+            >
+              {label}
+            </button>
+          ))}
+        </div>
+
         <div className="mb-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <p className="text-sm uppercase tracking-[0.3em] text-cyan-300">Game</p>
@@ -160,8 +239,19 @@ export default function PowersGame() {
             <div className="rounded-full bg-rose-400/10 px-4 py-2 text-sm text-rose-200">
               Lives <span className="font-bold text-white">{Array.from({ length: livesLeft }, () => "♥").join(" ")}</span>
             </div>
+            {mode === "timed" ? (
+              <div className="rounded-full bg-amber-400/10 px-4 py-2 text-sm text-amber-200">
+                Time <span className="font-bold text-white">{timeLeft}s</span>
+              </div>
+            ) : null}
           </div>
         </div>
+
+        {showCelebration ? (
+          <div className="mb-4 rounded-2xl border border-emerald-300/20 bg-emerald-300/10 p-3 text-sm text-emerald-100 animate-pulse">
+            Correct streak building 🌟
+          </div>
+        ) : null}
 
         <div className="mb-6 grid gap-4 md:grid-cols-2">
           <label className="grid gap-2 text-sm text-slate-200">
@@ -203,16 +293,23 @@ export default function PowersGame() {
         <div className="mt-4 flex flex-wrap gap-3">
           <button
             type="button"
-            onClick={resetGame}
+            onClick={() => resetGame()}
             className="rounded-full border border-white/10 px-4 py-2 text-sm text-slate-200 transition hover:border-cyan-300 hover:text-white"
           >
             Reset
+          </button>
+          <button
+            type="button"
+            onClick={() => void copyShareCard()}
+            className="rounded-full border border-fuchsia-300/20 bg-fuchsia-300/10 px-4 py-2 text-sm text-fuchsia-100 transition hover:bg-fuchsia-300/20"
+          >
+            {shareCopied ? "Copied" : "Share score card"}
           </button>
           <div className="rounded-full bg-fuchsia-400/10 px-4 py-2 text-sm text-fuchsia-200">
             Highest score ever: <span className="font-bold text-white">{highScore}</span>
           </div>
           <div className="rounded-full bg-emerald-400/10 px-4 py-2 text-sm text-emerald-200">
-            Next target: <span className="font-bold text-white">{formatPower(currentExponent + 1)}</span>
+            {nextPrompt}
           </div>
           {submitting ? <div className="rounded-full bg-white/10 px-4 py-2 text-sm text-slate-300">Saving score...</div> : null}
         </div>

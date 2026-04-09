@@ -1,6 +1,6 @@
 import PowersGame from "./powers-game";
 
-const powers = Array.from({ length: 12 }, (_, index) => ({
+const powers = Array.from({ length: 16 }, (_, index) => ({
   exponent: index,
   value: 2 ** index,
 }));
@@ -8,15 +8,15 @@ const powers = Array.from({ length: 12 }, (_, index) => ({
 const timeline = [
   {
     title: "Ancient doubling",
-    text: "Long before computers, people noticed the magic of repeated doubling in trade, measurement, and stories like the wheat-and-chessboard puzzle. Powers of 2 feel simple at first, then suddenly enormous.",
+    text: "Trade, counting systems, and famous puzzles all stumbled into exponential growth long before modern math formalized it.",
   },
   {
     title: "Binary changed everything",
-    text: "In the 17th century, Gottfried Wilhelm Leibniz championed binary, showing how all numbers could be built from just 0 and 1. That idea became the skeleton of modern computing.",
+    text: "Leibniz made binary feel profound, and computing later turned it into the language of machines.",
   },
   {
     title: "From cells to chips",
-    text: "Powers of 2 show up whenever systems branch, split, replicate, or encode information efficiently. They are deeply practical, not just pretty.",
+    text: "Branching biology and digital infrastructure both keep bumping into powers of 2 because splitting cleanly is useful.",
   },
 ];
 
@@ -51,52 +51,20 @@ export default function Home() {
 
         <div className="rounded-[1.5rem] border border-white/10 bg-slate-950/60 p-6">
           <p className="text-sm uppercase tracking-[0.3em] text-fuchsia-300">Powers of 2 in one picture</p>
-          <div className="mt-4 overflow-hidden rounded-[1.5rem] border border-white/10 bg-[radial-gradient(circle_at_center,_rgba(34,211,238,0.12),_transparent_45%),linear-gradient(180deg,rgba(15,23,42,0.95),rgba(2,6,23,0.95))] p-5">
+          <div className="mt-4 overflow-hidden rounded-[1.5rem] border border-white/10 bg-[radial-gradient(circle_at_center,_rgba(34,211,238,0.12),_transparent_45%),linear-gradient(180deg,rgba(15,23,42,0.95),rgba(2,6,23,0.95))] p-4 sm:p-5">
             <div className="relative min-h-[420px] overflow-hidden rounded-[1.25rem] border border-white/10 bg-slate-950/70 sm:min-h-[340px]">
-              <div className="absolute inset-x-0 bottom-0 h-24 bg-[linear-gradient(180deg,transparent,rgba(15,23,42,0.95))]" />
-              <div className="absolute left-1/2 top-8 h-48 w-px -translate-x-1/2 bg-cyan-200/40" />
-              <div className="absolute left-1/2 top-16 h-16 w-16 -translate-x-1/2 rounded-full border border-cyan-300/30 bg-cyan-300/10" />
-              <div className="absolute left-[calc(50%-7rem)] top-32 h-12 w-px rotate-45 bg-cyan-200/40" />
-              <div className="absolute left-[calc(50%+7rem)] top-32 h-12 w-px -rotate-45 bg-cyan-200/40" />
-              <div className="absolute left-[calc(50%-10rem)] top-40 h-10 w-px rotate-[65deg] bg-cyan-200/35" />
-              <div className="absolute left-[calc(50%-4rem)] top-40 h-10 w-px rotate-[25deg] bg-cyan-200/35" />
-              <div className="absolute left-[calc(50%+4rem)] top-40 h-10 w-px -rotate-[25deg] bg-cyan-200/35" />
-              <div className="absolute left-[calc(50%+10rem)] top-40 h-10 w-px -rotate-[65deg] bg-cyan-200/35" />
-
-              {[
-                { label: "1 seed", className: "left-1/2 top-10 -translate-x-1/2" },
-                { label: "2 branches", className: "left-[calc(50%-7rem)] top-28" },
-                { label: "4 leaves", className: "left-[calc(50%-10rem)] top-40" },
-                { label: "8 leaflets", className: "left-[calc(50%+4rem)] top-40" },
-                { label: "16 cells", className: "left-[calc(50%-12rem)] top-52" },
-                { label: "32 bits", className: "right-6 top-14" },
-                { label: "64 pixels", className: "right-10 top-28" },
-                { label: "128 bytes", className: "right-8 top-44" },
-                { label: "256 states", className: "right-14 top-60" },
-              ].map((node) => (
-                <div
-                  key={node.label}
-                  className={`absolute rounded-full border border-white/10 bg-white/8 px-3 py-1 text-xs font-medium text-slate-200 backdrop-blur ${node.className}`}
-                >
-                  {node.label}
-                </div>
-              ))}
-
-              <div className="absolute bottom-4 left-4 right-4 grid grid-cols-2 gap-2 sm:bottom-6 sm:left-6 sm:right-6 sm:grid-cols-4">
-                {Array.from({ length: 8 }, (_, index) => (
-                  <div
-                    key={index}
-                    className="rounded-xl border border-fuchsia-300/20 bg-fuchsia-300/10 px-2 py-3 text-center text-[10px] uppercase tracking-[0.2em] text-fuchsia-100"
-                  >
-                    {2 ** index}
-                  </div>
-                ))}
-              </div>
+              <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_30%,rgba(16,185,129,0.18),transparent_24%),radial-gradient(circle_at_80%_25%,rgba(34,211,238,0.18),transparent_22%),radial-gradient(circle_at_70%_78%,rgba(217,70,239,0.16),transparent_25%)]" />
+              <div className="absolute left-[14%] top-[16%] h-40 w-px rotate-[-16deg] bg-emerald-200/40 sm:left-[18%]" />
+              <div className="absolute left-[14%] top-[22%] h-16 w-px rotate-45 bg-emerald-200/40 sm:left-[18%]" />
+              <div className="absolute left-[14%] top-[22%] h-16 w-px -rotate-45 bg-emerald-200/40 sm:left-[18%]" />
+              <div className="absolute left-[10%] top-[36%] h-10 w-px rotate-[60deg] bg-emerald-200/35" />
+              <div className="absolute left-[18%] top-[36%] h-10 w-px rotate-[20deg] bg-emerald-200/35" />
+              <div className="absolute left-[20%] top-[36%] h-10 w-px -[... ELLIPSIZATION ...]e-pink-300/10 px-4 py-2 text-pink-100">256 states</div>
+              <div className="absolute right-[16%] top-[74%] rounded-full border border-cyan-300/20 bg-cyan-300/10 px-4 py-2 text-cyan-100">1024 memory cells</div>
             </div>
           </div>
           <p className="mt-4 text-sm leading-7 text-slate-300">
-            Think of it as a split-screen metaphor: recursive growth on one side, binary infrastructure on the other.
-            Nature branches. Computers count. Powers of 2 quietly sit under both.
+            One image, two worlds: branching growth in nature on the left, bit-based infrastructure on the right.
           </p>
         </div>
       </section>
@@ -116,29 +84,42 @@ export default function Home() {
             </p>
             <p>
               And yes, fractals are connected here. Fractals are not simply powers of 2, but many fractal processes involve recursive splitting,
-              self-similarity, and branching patterns that echo doubling. When a structure keeps dividing into smaller copies of itself,
-              you are often feeling the spirit of powers of 2, even when the exact numbers get more complicated.
+              self-similarity, and branching patterns that echo doubling.
             </p>
           </div>
         </article>
 
         <article className="rounded-[2rem] border border-white/10 bg-slate-950/60 p-5 sm:p-8">
-          <p className="text-sm uppercase tracking-[0.3em] text-fuchsia-300">Brief history and practical use</p>
-          <h2 className="mt-3 text-3xl font-semibold text-white">From old puzzles to modern machines</h2>
-          <div className="mt-6 space-y-5">
+          <p className="text-sm uppercase tracking-[0.3em] text-fuchsia-300">History and practical uses</p>
+          <h2 className="mt-3 text-3xl font-semibold text-white">From puzzles to processors</h2>
+          <div className="mt-6 grid gap-4 sm:grid-cols-3">
             {timeline.map((item) => (
-              <div key={item.title} className="rounded-2xl border border-white/10 bg-white/5 p-5">
-                <h3 className="text-lg font-semibold text-white">{item.title}</h3>
-                <p className="mt-2 leading-7 text-slate-300">{item.text}</p>
+              <div key={item.title} className="rounded-2xl border border-white/10 bg-white/5 p-4">
+                <div className="mb-3 h-28 rounded-xl border border-white/10 bg-[linear-gradient(135deg,rgba(34,211,238,0.16),rgba(16,185,129,0.12),rgba(217,70,239,0.16))] p-3 text-xs text-white">
+                  <div className="flex h-full items-end justify-between">
+                    <span>{item.title}</span>
+                    <span className="rounded-full bg-slate-950/50 px-2 py-1">2x</span>
+                  </div>
+                </div>
+                <p className="text-sm leading-6 text-slate-300">{item.text}</p>
               </div>
             ))}
           </div>
-          <div className="mt-6 rounded-2xl border border-emerald-300/20 bg-emerald-300/10 p-5 text-slate-200">
-            <p className="font-medium text-white">Why it matters in practice</p>
-            <p className="mt-2 leading-7">
-              Computer memory, file sizes, processor logic, networking, compression, data structures, game maps, and graphics all lean on powers of 2.
-              They make systems easier to encode, align, split, and scale.
-            </p>
+          <div className="mt-6 rounded-2xl border border-emerald-300/20 bg-emerald-300/10 p-4 text-slate-200">
+            <div className="grid gap-3 sm:grid-cols-2">
+              {[
+                "memory",
+                "compression",
+                "graphics",
+                "networking",
+                "game maps",
+                "data structures",
+              ].map((item) => (
+                <div key={item} className="rounded-xl border border-white/10 bg-slate-950/45 px-3 py-4 text-center text-sm font-medium text-white">
+                  {item}
+                </div>
+              ))}
+            </div>
           </div>
         </article>
       </section>
@@ -148,19 +129,24 @@ export default function Home() {
           <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
             <div>
               <p className="text-sm uppercase tracking-[0.3em] text-amber-300">The sequence</p>
-              <h2 className="mt-2 text-3xl font-semibold text-white">The first twelve powers</h2>
+              <h2 className="mt-2 text-3xl font-semibold text-white">Watch it build</h2>
             </div>
             <p className="max-w-2xl text-sm leading-7 text-slate-300">
-              Each term doubles the one before it. That tiny repeated move is the whole trick, and also the whole wonder.
+              A single row makes the acceleration easier to feel.
             </p>
           </div>
-          <div className="mt-8 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-            {powers.map((power) => (
-              <div key={power.exponent} className="rounded-2xl border border-white/10 bg-white/5 p-5">
-                <p className="text-sm uppercase tracking-[0.25em] text-cyan-300">2^{power.exponent}</p>
-                <p className="mt-3 text-3xl font-semibold text-white">{power.value}</p>
-              </div>
-            ))}
+          <div className="mt-6 overflow-x-auto pb-2">
+            <div className="flex min-w-max items-center gap-3">
+              {powers.map((power, index) => (
+                <div key={power.exponent} className="flex items-center gap-3">
+                  <div className="rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-center">
+                    <p className="text-xs uppercase tracking-[0.25em] text-cyan-300">2^{power.exponent}</p>
+                    <p className="mt-1 text-lg font-semibold text-white">{power.value}</p>
+                  </div>
+                  {index < powers.length - 1 ? <span className="text-slate-500">→</span> : null}
+                </div>
+              ))}
+            </div>
           </div>
         </section>
 
